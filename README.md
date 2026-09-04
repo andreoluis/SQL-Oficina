@@ -61,21 +61,7 @@ Essa tabela realiza a ligação entre as ordens de serviço e os serviços execu
 
 A estrutura do banco segue a seguinte lógica:
 
-CLIENTE
-   │
-   └── possui
-          │
-          ▼
-       VEÍCULO
-          │
-          └── recebe
-                 │
-                 ▼
-          ORDEM DE SERVIÇO
-             │          │
-             │          └── é realizada por
-             ▼                         │
-          SERVIÇOS ◄──── MECÂNICO
+CLIENTE - possui -- VEÍCULO - recebe -- ORDEM DE SERVIÇO -- serviços realizados - MECANICO                    
 
 Uma ordem de serviço pode conter um ou mais serviços, por isso a tabela itens_ordem_servico é utilizada para representar esse relacionamento.
 
