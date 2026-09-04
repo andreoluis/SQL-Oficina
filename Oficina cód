@@ -1,0 +1,179 @@
+CREATE TABLE clientes (
+    id_cliente BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nome TEXT NOT NULL,
+    telefone TEXT,
+    email TEXT,
+    cidade TEXT
+);
+
+CREATE TABLE veiculos (
+    id_veiculo BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_cliente BIGINT NOT NULL,
+    placa TEXT NOT NULL UNIQUE,
+    marca TEXT NOT NULL,
+    modelo TEXT NOT NULL,
+    ano INTEGER NOT NULL,
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
+);
+
+CREATE TABLE mecanicos (
+    id_mecanico BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nome TEXT NOT NULL,
+    especialidade TEXT,
+    telefone TEXT
+);
+
+CREATE TABLE servicos (
+    id_servico BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nome_servico TEXT NOT NULL,
+    descricao TEXT,
+    valor_base NUMERIC(10,2) NOT NULL
+);
+
+CREATE TABLE ordens_servico (
+    id_ordem BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_veiculo BIGINT NOT NULL,
+    id_mecanico BIGINT NOT NULL,
+    data_entrada DATE NOT NULL,
+    data_saida DATE,
+    status TEXT NOT NULL,
+    FOREIGN KEY (id_veiculo) REFERENCES veiculos(id_veiculo),
+    FOREIGN KEY (id_mecanico) REFERENCES mecanicos(id_mecanico)
+);
+
+CREATE TABLE itens_ordem_servico (
+    id_item BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_ordem BIGINT NOT NULL,
+    id_servico BIGINT NOT NULL,
+    quantidade INTEGER NOT NULL,
+    valor_unitario NUMERIC(10,2) NOT NULL,
+    FOREIGN KEY (id_ordem) REFERENCES ordens_servico(id_ordem),
+    FOREIGN KEY (id_servico) REFERENCES servicos(id_servico)
+);
+
+
+INSERT INTO clientes (nome, telefone, email, cidade)
+VALUES
+('João da Silva', '(45) 99911-2233', 'joao@email.com', 'Toledo'),
+('Maria Oliveira', '(45) 99822-3344', 'maria@email.com', 'Toledo'),
+('Carlos Santos', '(45) 99733-4455', 'carlos@email.com', 'Cascavel'),
+('Ana Souza', '(45) 99644-5566', 'ana@email.com', 'Toledo'),
+('Pedro Costa', '(45) 99555-6677', 'pedro@email.com', 'Marechal Cândido Rondon');
+
+
+INSERT INTO veiculos (id_cliente, placa, marca, modelo, ano)
+VALUES
+(1, 'ABC1D23', 'Toyota', 'Corolla', 2020),
+(2, 'DEF4E56', 'Chevrolet', 'Onix', 2022),
+(3, 'GHI7F89', 'Volkswagen', 'Gol', 2018),
+(4, 'JKL1G23', 'Honda', 'Civic', 2021),
+(5, 'MNO4H56', 'Fiat', 'Argo', 2023),
+(1, 'PQR7I89', 'Ford', 'Ka', 2019);
+
+
+INSERT INTO mecanicos (nome, especialidade, telefone)
+VALUES
+('Rafael Mendes', 'Motor', '(45) 99912-1111'),
+('Lucas Ferreira', 'Suspensão', '(45) 99923-2222'),
+('Marcos Almeida', 'Freios', '(45) 99934-3333'),
+('Bruno Martins', 'Elétrica', '(45) 99945-4444');
+
+
+INSERT INTO servicos (nome_servico, descricao, valor_base)
+VALUES
+('Troca de óleo', 'Troca do óleo do motor', 180.00),
+('Alinhamento', 'Alinhamento das rodas', 100.00),
+('Balanceamento', 'Balanceamento das rodas', 80.00),
+('Troca de pastilhas', 'Substituição das pastilhas de freio', 250.00),
+('Revisão do motor', 'Verificação geral do motor', 450.00),
+('Diagnóstico elétrico', 'Diagnóstico do sistema elétrico', 150.00),
+('Troca de bateria', 'Substituição da bateria', 120.00);
+
+
+INSERT INTO ordens_servico
+(id_veiculo, id_mecanico, data_entrada, data_saida, status)
+VALUES
+(1, 1, '2026-08-20', '2026-08-20', 'Concluída'),
+(2, 2, '2026-08-21', '2026-08-22', 'Concluída'),
+(3, 3, '2026-08-22', '2026-08-23', 'Concluída'),
+(4, 4, '2026-08-25', NULL, 'Em andamento'),
+(5, 1, '2026-08-27', '2026-08-28', 'Concluída'),
+(6, 2, '2026-08-30', NULL, 'Em andamento');
+
+
+INSERT INTO itens_ordem_servico
+(id_ordem, id_servico, quantidade, valor_unitario)
+VALUES
+(1, 1, 1, 180.00),
+(1, 2, 1, 100.00),
+(2, 3, 1, 80.00),
+(2, 4, 1, 250.00),
+(3, 5, 1, 450.00),
+(4, 6, 1, 150.00),
+(5, 1, 1, 180.00),
+(5, 7, 1, 120.00),
+(6, 2, 1, 100.00),
+(6, 3, 1, 80.00);
+
+
+SELECT nome, telefone, cidade
+FROM clientes
+ORDER BY nome;
+
+
+SELECT marca, modelo, ano, placa
+FROM veiculos
+WHERE id_cliente = 1;
+
+
+SELECT
+    clientes.nome,
+    veiculos.marca,
+    veiculos.modelo,
+    veiculos.placa
+FROM clientes
+INNER JOIN veiculos
+ON clientes.id_cliente = veiculos.id_cliente
+ORDER BY clientes.nome;
+
+
+SELECT
+    clientes.nome AS cliente,
+    veiculos.marca,
+    veiculos.modelo,
+    mecanicos.nome AS mecanico,
+    ordens_servico.data_entrada,
+    ordens_servico.status
+FROM ordens_servico
+INNER JOIN veiculos
+ON ordens_servico.id_veiculo = veiculos.id_veiculo
+INNER JOIN clientes
+ON veiculos.id_cliente = clientes.id_cliente
+INNER JOIN mecanicos
+ON ordens_servico.id_mecanico = mecanicos.id_mecanico
+ORDER BY ordens_servico.data_entrada;
+
+
+SELECT
+    id_ordem,
+    id_veiculo,
+    data_entrada,
+    status
+FROM ordens_servico
+WHERE status = 'Em andamento';
+
+
+SELECT
+    nome_servico,
+    valor_base
+FROM servicos
+WHERE valor_base > 150
+ORDER BY valor_base DESC;
+
+
+SELECT
+    id_ordem,
+    SUM(quantidade * valor_unitario) AS valor_total
+FROM itens_ordem_servico
+GROUP BY id_ordem
+ORDER BY valor_total DESC;
